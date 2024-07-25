@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Webmap with ArcGIS REST Service, Attribute Pop-up, and Basemap Choices</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 600px;"></div>
+    <script>
+        // Initialize the map and set its view to the specified location and zoom level
+        var map = L.map('map').setView([-6.2, 106.8], 10); // Centered on Jakarta, Indonesia
+
+        // Define Esri basemaps
+        var basemaps = {
+            "Topographic": L.esri.basemapLayer('Topographic'),
+            "Streets": L.esri.basemapLayer('Streets'),
+            "National Geographic": L.esri.basemapLayer('NationalGeographic'),
+            "Oceans": L.esri.basemapLayer('Oceans'),
+            "Gray": L.esri.basemapLayer('Gray'),
+            "Dark Gray": L.esri.basemapLayer('DarkGray'),
+            "Imagery": L.esri.basemapLayer('Imagery'),
+            "Imagery with Labels": L.layerGroup([
+                L.esri.basemapLayer('Imagery'),
+                L.esri.basemapLayer('ImageryLabels')
+            ])
+        };
+
+        // Add default basemap to map
+        basemaps.Topographic.addTo(map);
+
+        // Add feature layers
+        var featureLayer1 = L.esri.featureLayer({
+            url: 'https://gis.bnpb.go.id/server/rest/services/Banjir_Jakarta_2020/GENANGAN_BANJIR_DKI_1_3_JANUARI_2020/MapServer/0',
+            style: function() {
+                return {
+                    color: 'green',
+                    weight: 2
+                };
+            }
+        }).addTo(map);
+
+        var featureLayer2 = L.esri.featureLayer({
+            url: 'https://gis.bnpb.go.id/server/rest/services/Banjir_Jakarta_2020/Geoportal_Kab_Bogor/MapServer/4',
+            style: function() {
+                return {
+                    color: 'blue',
+                    weight: 2
+                };
+            }
+        }).addTo(map);
+
+        var featureLayer3 = L.esri.featureLayer({
+            url: 'https://gis.bnpb.go.id/server/rest/services/Banjir_Jakarta_2020/Geoportal_Kab_Bogor/MapServer/5',
+            style: function() {
+                return {
+                    color: 'red',
+                    weight: 2
+                };
+            }
+        }).addTo(map);
+
+        // Function to generate pop-up content with all attributes
+        function generatePopupContent(properties) {
+            var popupContent = '<table>';
+            for (var key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    popupContent += '<tr><th>' + key + '</th><td>' + properties[key] + '</td></tr>';
+                }
+            }
+            popupContent += '</table>';
+            return popupContent;
+        }
+
+        // Event listener for clicks on the first feature layer
+        featureLayer1.on('click', function(e) {
+            var properties = e.layer.feature.properties;
+            var popupContent = generatePopupContent(properties);
+            e.layer.bindPopup(popupContent).openPopup();
+        });
+
+        // Event listener for clicks on the second feature layer
+        featureLayer2.on('click', function(e) {
+            var properties = e.layer.feature.properties;
+            var popupContent = generatePopupContent(properties);
+            e.layer.bindPopup(popupContent).openPopup();
+        });
+
+        // Event listener for clicks on the second feature layer
+        featureLayer3.on('click', function(e) {
+            var properties = e.layer.feature.properties;
+            var popupContent = generatePopupContent(properties);
+            e.layer.bindPopup(popupContent).openPopup();
+        });
+
+        // Create overlay layers object
+        var overlays = {
+            "Genangan Banjir DKI 1-3 Januari 2020": featureLayer1,
+            "Geoportal Kab Bogor": featureLayer2,
+            "Data DAS": featureLayer3
+        };
+
+        // Add basemap and overlay control to the map
+        L.control.layers(basemaps, overlays, { position: 'topright' }).addTo(map);
+    </script>
+</body>
+</html>
